@@ -1,0 +1,4 @@
+twisted
+requests
+pyVmomi
+prometheus_client
