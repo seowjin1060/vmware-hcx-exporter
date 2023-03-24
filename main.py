@@ -1,7 +1,4 @@
 import time
-import random
-from typing import Dict
-
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 from prometheus_client.metrics_core import GaugeMetricFamily, CounterMetricFamily
@@ -42,8 +39,9 @@ class Client(Session):
     def render_get(self, prefix: str, body: dict):
         headers = self.headers
         url = self.url + prefix
+        ssl_verify = os.environ.get("SSL_VERIFY")
         response = requests.request("GET", url, headers=headers, body=body,
-                                    auth=HTTPBasicAuth(self.vmware_hcx_id, self.vmware_hcx_pw))
+                                    auth=HTTPBasicAuth(self.vmware_hcx_id, self.vmware_hcx_pw), verify=bool(ssl_verify))
         return response
 
     def get_tasks(self, state: str):
@@ -93,10 +91,11 @@ class myCustomCollector(object):
         metric_list['alert'] = GaugeMetricFamily("number_of_alert", "Count Of Alerts by Severity",
                                                   labels=["severity"])
         alert_metric = metric_list['alert']
-        task_metric.add_metric(["critical"], len(critical_alerts))
-        task_metric.add_metric([""], len(warning_alerts))
-        task_metric.add_metric(["", "Second"], len(info_alerts))
+        alert_metric.add_metric(["critical"], len(critical_alerts))
+        alert_metric.add_metric(["warning"], len(warning_alerts))
+        alert_metric.add_metric(["info"], len(info_alerts))
         yield metric_list['alert']
+
 
 if __name__ == "__main__":
     port = 9000

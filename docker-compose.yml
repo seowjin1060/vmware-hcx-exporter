@@ -9,7 +9,7 @@ services:
         VMWARE_HCX_IP: "vcenter-host"
         VMWARE_HCX_ID: ""
         VMWARE_HCX_PW: ""
-        IGNORE_SSL: "True"
+        SSL_VERIFY: "True"
 #        COLLECT_VMS: "False"
 #        COLLECT_VMGUESTS: "False"
     restart: always
