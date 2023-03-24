@@ -46,9 +46,18 @@ class Client(Session):
                                     verify=bool(ssl_verify))
         return response
 
+    def render_post(self, prefix: str, body: dict):
+        headers = self.headers
+        url = self.url + prefix
+        ssl_verify = os.environ.get("SSL_VERIFY")
+        body["x-hm-authorization"] = self.token
+        response = requests.request("POST", url, headers=headers, body=body,
+                                    verify=bool(ssl_verify))
+        return response
+
     def get_tasks(self, state: str):
-        body = {"filter": {"state": state}}
-        response = self.render_get(prefix="tasks/", body=body)
+        body = {"filter": {"status": state}}
+        response = self.render_post(prefix="interconnect/tasks/", body=body)
         tasks = response['items']
         return tasks
 
@@ -58,8 +67,8 @@ class Client(Session):
         return tasks
 
     def get_alerts(self, severity: str):
-        body = {"filter": {"state": severity}}
-        response = self.render_get(prefix="steps/", body=body)
+        body = {"filter": {"severity": severity}}
+        response = self.render_post(prefix="alerts/", body=body)
         tasks = response['items']
         return tasks
 
