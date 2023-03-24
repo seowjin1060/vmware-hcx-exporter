@@ -1,8 +1,8 @@
 version: '2'
 services:
-  vmware_exporter:
+  hcx_exporter:
     # Using the latest tag, but you can use vers(v0.9.5 for example
-    image: hcx_exporter:latest
+    image: hcx_exporter:dev
     ports:
         - "9000:9000"
     environment:

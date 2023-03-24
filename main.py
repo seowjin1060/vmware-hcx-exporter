@@ -21,6 +21,7 @@ class Session:
 
     def get_token(self):
         url = self.url + "session/"
+        print(url)
         response = requests.request("GET", url, verify=False, headers=self.headers, data=self.payload,
                                     auth=HTTPBasicAuth(self._vmware_hcx_id, self._vmware_hcx_pw))
         return response
