@@ -56,7 +56,7 @@ class Client(Session):
         return response
 
     def get_tasks(self, state: str):
-        body = {"filter": {"status": state}}
+        body = {"filter": {"status": [state]}}
         response = self.render_post(prefix="interconnect/tasks/", body=body)
         tasks = response['items']
         return tasks
@@ -67,8 +67,8 @@ class Client(Session):
         return tasks
 
     def get_alerts(self, severity: str):
-        body = {"filter": {"severity": severity}}
-        response = self.render_post(prefix="alerts/", body=body)
+        body = {"filter": {"severity": [severity]}}
+        response = self.render_post(prefix="alerts?action=query", body=body)
         tasks = response['items']
         return tasks
 
@@ -95,9 +95,9 @@ class myCustomCollector(object):
         # metric_list['step'] = GaugeMetricFamily()
         # yield metric_list['step']
 
-        critical_alerts = self.client.get_tasks(state="RUNNING")
-        warning_alerts = self.client.get_tasks(state="FAILED")
-        info_alerts = self.client.get_tasks(state="SUCCESS")
+        critical_alerts = self.client.get_alerts(severity="RUNNING")
+        warning_alerts = self.client.get_alerts(severity="FAILED")
+        info_alerts = self.client.get_alerts(severity="SUCCESS")
 
         metric_list['alert'] = GaugeMetricFamily("number_of_alert", "Count Of Alerts by Severity",
                                                   labels=["severity"])
@@ -116,3 +116,4 @@ if __name__ == "__main__":
 
     while True:
         time.sleep(frequency)
+
