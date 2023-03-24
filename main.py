@@ -16,15 +16,15 @@ class Session:
         self.payload = {}
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Basic '
         }
 
     def get_token(self):
-        url = self.url + "session/"
-        print(url)
-        response = requests.request("GET", url, verify=False, headers=self.headers, data=self.payload,
-                                    auth=HTTPBasicAuth(self._vmware_hcx_id, self._vmware_hcx_pw))
-        return response
+        url = self.url + "sessions/"
+        self.payload["username"] = self._vmware_hcx_id
+        self.payload["password"] = self._vmware_hcx_pw
+        response = requests.request("POST", url, verify=False, headers=self.headers, data=self.payload,
+                                    )
+        return response.headers["x-hm-authorization"]
 
 
 class Client(Session):
@@ -35,14 +35,15 @@ class Client(Session):
             'Content-Type': 'application/json',
             'Authorization': 'Basic '
         }
-        token = self.get_token()
+        self.token = self.get_token()
 
     def render_get(self, prefix: str, body: dict):
         headers = self.headers
         url = self.url + prefix
         ssl_verify = os.environ.get("SSL_VERIFY")
+        body["x-hm-authorization"] = self.token
         response = requests.request("GET", url, headers=headers, body=body,
-                                    auth=HTTPBasicAuth(self.vmware_hcx_id, self.vmware_hcx_pw), verify=bool(ssl_verify))
+                                    verify=bool(ssl_verify))
         return response
 
     def get_tasks(self, state: str):
