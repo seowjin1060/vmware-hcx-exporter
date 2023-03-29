@@ -19,11 +19,11 @@ class Session:
         }
 
     def get_token(self):
-        url = self.url + "sessions/"
+        url = self.url + "sessions"
         self.payload["username"] = self._vmware_hcx_id
         self.payload["password"] = self._vmware_hcx_pw
-        response = requests.request("POST", url, verify=False, headers=self.headers, data=self.payload,
-                                    )
+        response = requests.request("POST", url, verify=False, headers=self.headers, json=self.payload)
+        print(response.text)
         return response.headers["x-hm-authorization"]
 
 
@@ -42,8 +42,9 @@ class Client(Session):
         url = self.url + prefix
         ssl_verify = os.environ.get("SSL_VERIFY")
         body["x-hm-authorization"] = self.token
-        response = requests.request("GET", url, headers=headers, body=body,
+        response = requests.request("GET", url, headers=headers, json=body,
                                     verify=bool(ssl_verify))
+        print(response)
         return response
 
     def render_post(self, prefix: str, body: dict):
@@ -51,13 +52,14 @@ class Client(Session):
         url = self.url + prefix
         ssl_verify = os.environ.get("SSL_VERIFY")
         body["x-hm-authorization"] = self.token
-        response = requests.request("POST", url, headers=headers, body=body,
+        response = requests.request("POST", url, headers=headers, json=body,
                                     verify=bool(ssl_verify))
+        print(response)
         return response
 
     def get_tasks(self, state: str):
         body = {"filter": {"status": [state]}}
-        response = self.render_post(prefix="interconnect/tasks/", body=body)
+        response = self.render_post(prefix="interconnect/tasks/", json=body)
         tasks = response['items']
         return tasks
 
@@ -71,7 +73,6 @@ class Client(Session):
         response = self.render_post(prefix="alerts?action=query", body=body)
         tasks = response['items']
         return tasks
-
 
 class myCustomCollector(object):
     def __init__(self):
